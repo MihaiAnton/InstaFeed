@@ -60,6 +60,3 @@ workflows:
       - django-test:
           requires:
             - python-linting
-      - docker-dev-build:
-          requires:
-            - django-test
