@@ -3,6 +3,17 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# django 
+db.sqlite3
+
+# vs code
+.vscode/*
+vscode
+
+# Python cache
+__pycache__/
+migrations/
+
 # User-specific files
 *.rsuser
 *.suo
