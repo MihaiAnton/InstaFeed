@@ -1,11 +1,12 @@
 from .IInstagramScraper import IInstagramScraper
-from ..models import Profile, Post
 import selenium.webdriver as webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import time
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 class InstagramScraper(IInstagramScraper):
@@ -14,7 +15,10 @@ class InstagramScraper(IInstagramScraper):
     def __init__(self, username, password):
         self._username = username
         self._password = password
-        self._driver = webdriver.Chrome()
+
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('--headless')
+        self._driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=chrome_options)
         self._loggedIn = self.login()
 
         if not self._loggedIn:
@@ -26,7 +30,6 @@ class InstagramScraper(IInstagramScraper):
 
         try:
             # access instagram
-            self._driver = webdriver.Chrome()
             self._driver.get(self.URL)
 
             # accept cookies
@@ -34,8 +37,10 @@ class InstagramScraper(IInstagramScraper):
                 (By.XPATH, "//button[text()='Accept']"))).click()
 
             # complete login form
-            self._driver.find_element_by_name("username").send_keys(self._username)
-            self._driver.find_element_by_name("password").send_keys(self._password)
+            WebDriverWait(self._driver, 10).until(EC.element_to_be_clickable(
+                (By.NAME, "username"))).send_keys(self._username)
+            WebDriverWait(self._driver, 10).until(EC.element_to_be_clickable(
+                (By.NAME, "password"))).send_keys(self._password)
 
             # login
             loginXpath = f"//div[@class='                     Igw0E     IwRSH      eGOV_         _4EzTm{' '*110}']"
@@ -57,14 +62,16 @@ class InstagramScraper(IInstagramScraper):
         if not self._loggedIn:
             self.login()
         if not self._loggedIn:
-            return Profile(username=username, accessible=False)
+            raise Exception(f"Not logged in on scrape: profile={username}")
+
+        self._driver.get(f"{self.URL}{username}/?hl=en")
 
         post_paths = self._get_post_paths()
         posts = []
 
         for post_path in post_paths:
             try:
-                post_data = self._scrape_post(post_path)
+                post_data = self.scrape_post(post_path)
                 posts.append({"path": post_path, "data": post_data})
             except Exception as err:
                 # TODO log
@@ -72,7 +79,7 @@ class InstagramScraper(IInstagramScraper):
 
         return {"posts": posts}
 
-    def _get_post_paths(self) -> set[str]:
+    def _get_post_paths(self) -> set:
         """Returns a list with the paths of each post
 
         Returns:
@@ -103,7 +110,7 @@ class InstagramScraper(IInstagramScraper):
 
         return post_paths
 
-    def _scrape_post(self, path) -> dict:
+    def scrape_post(self, path) -> dict:
         """Scrapes a particular post and returns a dictionary.
 
         Arguments:
@@ -112,14 +119,15 @@ class InstagramScraper(IInstagramScraper):
         Returns:
             dict: {description: str, photo_urls: [str]}
         """
+        self._driver.get(self.URL + path)
         photo_urls = set()
         description = ""
 
-        _description = self._driver.find_elements_by_xpath("//div[@class='C4VMK']//span")
+        _description = self._driver.find_elements_by_xpath("//div[@class='C7I1f X7jCj']//div[@class='C4VMK']//span")
         if len(_description) > 1:
-            description = BeautifulSoup(_description[1].get_attribute('innerHTML')).text
+            description = BeautifulSoup(_description[1].get_attribute('innerHTML'), "html.parser").text
 
-        images = self._driver.find_elements_by_xpath("//li[@class='Ckrof']//img")
+        images = self._driver.find_elements_by_xpath("//div[@class='_97aPb wKWK0']//div[@class='KL4Bh']//img")
         images = [image.get_attribute('src') for image in images]
 
         for path in images:
@@ -135,7 +143,8 @@ class InstagramScraper(IInstagramScraper):
 
             if has_next:
                 try:
-                    images = self._driver.find_elements_by_xpath("//li[@class='Ckrof']//img")
+                    images = self._driver.find_elements_by_xpath(
+                        "//div[@class='_97aPb wKWK0']//div[@class='KL4Bh']//img")
                     images = [image.get_attribute('src') for image in images]
 
                     for path in images:
@@ -144,4 +153,4 @@ class InstagramScraper(IInstagramScraper):
                 except Exception as err:
                     pass
 
-        return {"desription": description, "photo_urls": list[photo_urls]}
+        return {"description": description, "photo_urls": list(photo_urls)}
