@@ -1,3 +1,7 @@
 from django.contrib import admin
+from .models import Profile, Post, Image, Change
 
-# Register your models here.
+admin.register(Profile)
+admin.register(Post)
+admin.register(Image)
+admin.register(Change)
