@@ -5,6 +5,7 @@ RUN mkdir /code
 WORKDIR /code
 
 COPY requirements.txt /code/
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # Adding trusting keys to apt for repositories
@@ -25,6 +26,6 @@ RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
 
 # set display port to avoid crash
 ENV DISPLAY=:99
-
+RUN pip install redis django-celery-beat
 
 COPY . /code/

@@ -5,6 +5,15 @@ networks:
     driver: bridge
 
 services:
+  celery: #for starting celery
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: bash -c "celery -A instafeed worker -B -l info"
+    depends_on:
+      - migrations
+      - chrome
+
   migrations: # for migrations purposes after the server is up
     build:
       context: .
@@ -38,11 +47,18 @@ services:
       - 443:443
     depends_on:
       - web-wsgi
+      - redis
     networks:
       - web
     volumes:
       - .:/code # for syncing with django source code
       - ./nginx:/etc/nginx/conf.d
+
+  redis:
+    image: redis:latest
+    command: redis-server
+    expose:
+      - 6379
 
   # selenium-hub:
   #   image: selenium/hub:4.0.0-beta-1-prerelease-20210201
