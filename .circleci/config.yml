@@ -33,15 +33,15 @@ jobs:
       - run:
           name: Building dev container
           command: |
-            docker-compose -f docker-compose.dev.yml build
+            docker-compose -f docker-compose.yml build
       - run:
           name: Running dev image
           command: |
-            docker-compose -f docker-compose.dev.yml up -d
+            docker-compose -f docker-compose.yml up -d
       - run:
           name: Stopping dev image
           command: |
-            docker-compose -f docker-compose.dev.yml down
+            docker-compose -f docker-compose.yml down
 
   python-linting:
     docker:
