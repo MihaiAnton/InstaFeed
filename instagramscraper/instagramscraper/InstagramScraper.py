@@ -5,6 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import time
+
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
@@ -28,6 +29,12 @@ class InstagramScraper(IInstagramScraper):
                 raise Exception("Could not log into Instagram on init.")
         else:
             self._loggedIn = False
+
+    def __del__(self):
+        try:
+            self._driver.close()
+        except Exception as err:
+            pass
 
     def login(self) -> bool:
         """Logs in Instagram
