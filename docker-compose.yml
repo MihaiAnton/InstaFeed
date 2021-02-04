@@ -9,7 +9,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: bash -c "celery -A instafeed worker -B -l info"
+    command: bash -c "celery -A instafeed worker -B -S django -l info"
+    networks:
+      - web
     depends_on:
       - migrations
       - chrome
@@ -18,10 +20,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: bash -c "python manage.py migrate"
+    command: bash -c "python manage.py makemigrations & python manage.py collectstatic --noinput & python manage.py migrate"
+    networks:
+      - web
     depends_on:
       - web-wsgi
-      # - db
+      - db
 
   web-wsgi:
     build:
@@ -56,6 +60,8 @@ services:
 
   redis:
     image: redis:latest
+    networks:
+      - web
     command: redis-server
     expose:
       - 6379
@@ -86,14 +92,16 @@ services:
     expose:
       - "4449"
 
-  # db:
-  #   image: postgres
-  #   environment:
-  #     - POSTGRES_DB=postgres
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #   expose:
-  #     - 5432
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    expose:
+      - 5432
+    networks:
+      - web
 
 volumes:
   media:

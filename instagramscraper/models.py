@@ -16,8 +16,9 @@ class Profile(models.Model):
 
 class Post(models.Model):
     path = models.TextField(primary_key=True, max_length=256)
-    description = models.TextField(max_length=1024, default="")
+    description = models.TextField(max_length=2048, default="")
     profile = models.ForeignKey(Profile, on_delete=models.PROTECT)
+    removed = models.BooleanField(default=False)
 
     def __str__(self):
         return f"<Post {self.description}>"
@@ -27,7 +28,7 @@ class Post(models.Model):
 
 
 class Image(models.Model):
-    url = models.URLField(primary_key=True)
+    url = models.TextField(primary_key=True, max_length=1024)
     post = models.ForeignKey(Post, on_delete=models.PROTECT)
     # TODO add actual image
 

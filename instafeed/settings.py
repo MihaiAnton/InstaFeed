@@ -27,12 +27,15 @@ if os.path.isfile(dotenv_file):
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY") or "key-debug-placeholder"
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", "TRUE") == "TRUE"
+# DEBUG = os.environ.get("DEBUG", "TRUE") == "TRUE"
 
-ALLOWED_HOSTS = ["*"]
+# ALLOWED_HOSTS = ["*"]
 
-if DEBUG:
-    ALLOWED_HOSTS.append("*")
+# if DEBUG:
+#     ALLOWED_HOSTS.append("*")
+DEBUG = True
+
+ALLOWED_HOSTS = ["localhost", "192.168.0.121", "127.0.0.1"]
 
 
 # Application definition
@@ -50,6 +53,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -57,7 +61,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 ROOT_URLCONF = 'instafeed.urls'
+DJANGO_ADMIN_URL = '^admin/'
 
 TEMPLATES = [
     {
@@ -82,9 +89,17 @@ WSGI_APPLICATION = 'instafeed.wsgi.application'
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # }
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'db',
+        'PORT': 5432,
     }
 }
 
@@ -125,8 +140,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = '/static/'
-
 
 # CELERY STUFF
 BROKER_URL = 'redis://redis:6379'
@@ -138,7 +151,14 @@ CELERY_TIMEZONE = 'Europe/London'
 CELERY_BEAT_SCHEDULE = {
     'refresh_profile_knowledge': {
         'task': 'instagramscraper.tasks.scrap_and_check_for_updates',
-        'schedule': 3600.0,
+        'schedule': 600.0,
         'args': (),
     },
 }
+
+STATIC_URL = '/staticfiles/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
