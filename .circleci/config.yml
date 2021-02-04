@@ -6,13 +6,6 @@ jobs:
       - image: circleci/python:3.7
     steps:
       - checkout
-      - run: mkdir test-reports
-      - run: sudo pip install selenium
-      - run: sudo pip install requests
-      - run: sudo wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-      - run: sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-      - run: sudo apt-get -y update
-      - run: sudo apt-get install -y google-chrome-stable
       - restore_cache:
           key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
       - run:

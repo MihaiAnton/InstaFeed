@@ -7,22 +7,27 @@ from bs4 import BeautifulSoup
 import time
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 
 class InstagramScraper(IInstagramScraper):
     URL = 'https://www.instagram.com/'
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, login=True):
         self._username = username
         self._password = password
+        chrome_options = Options()
 
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument('--headless')
-        self._driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=chrome_options)
-        self._loggedIn = self.login()
+        self._driver = webdriver.Remote(command_executor='http://chrome:4444/wd/hub',
+                                        desired_capabilities=DesiredCapabilities.CHROME)
 
-        if not self._loggedIn:
-            raise Exception("Could not log into Instagram on init.")
+        if login:
+            self._loggedIn = self.login()
+
+            if not self._loggedIn:
+                raise Exception("Could not log into Instagram on init.")
+        else:
+            self._loggedIn = False
 
     def login(self) -> bool:
         """Logs in Instagram
@@ -33,8 +38,11 @@ class InstagramScraper(IInstagramScraper):
             self._driver.get(self.URL)
 
             # accept cookies
-            WebDriverWait(self._driver, 10).until(EC.element_to_be_clickable(
-                (By.XPATH, "//button[text()='Accept']"))).click()
+            try:
+                WebDriverWait(self._driver, 4).until(EC.element_to_be_clickable(
+                    (By.XPATH, "//button[text()='Accept']"))).click()
+            except Exception as err:
+                pass
 
             # complete login form
             WebDriverWait(self._driver, 10).until(EC.element_to_be_clickable(
@@ -46,13 +54,18 @@ class InstagramScraper(IInstagramScraper):
             loginXpath = f"//div[@class='                     Igw0E     IwRSH      eGOV_         _4EzTm{' '*110}']"
             WebDriverWait(self._driver, 10).until(EC.element_to_be_clickable((By.XPATH, loginXpath))).click()
 
-            # don't save login info
-            dontSaveXpath = "/html/body/div[1]/section/main/div/div/div/div/button"
-            WebDriverWait(self._driver, 10).until(EC.element_to_be_clickable((By.XPATH, dontSaveXpath))).click()
+            try:  # don't save login data
+                dontSaveXpath = "/html/body/div[1]/section/main/div/div/div/div/button"
+                WebDriverWait(self._driver, 10).until(EC.element_to_be_clickable((By.XPATH, dontSaveXpath))).click()
+            except Exception as err:
+                pass
 
-            # close notifications popup
-            notNowXpath = "/html/body/div[4]/div/div/div/div[3]/button[2]"
-            WebDriverWait(self._driver, 10).until(EC.element_to_be_clickable((By.XPATH, notNowXpath))).click()
+            try:  # no notifications
+                notNowXpath = "/html/body/div[4]/div/div/div/div[3]/button[2]"
+                WebDriverWait(self._driver, 10).until(EC.element_to_be_clickable((By.XPATH, notNowXpath))).click()
+            except Exception as err:
+                pass
+
             return True
         except Exception as err:
             # TODO log
@@ -120,6 +133,7 @@ class InstagramScraper(IInstagramScraper):
             dict: {description: str, photo_urls: [str]}
         """
         self._driver.get(self.URL + path)
+
         photo_urls = set()
         description = ""
 
