@@ -15,8 +15,8 @@ def index(request):
         data = scraper.scrape_post("/p/CBYzTySjak1/")
 
         del scraper
-
-
+    except Exception as err:
+        print(err)
 
     response = JsonResponse(data)
     response.status_code = 200
