@@ -2,6 +2,7 @@ from celery import shared_task
 from .models import Profile, Post, Image, Change
 from .instagramscraper import InstagramScraper
 import os
+from django.core.mail import send_mail
 
 
 def save_new_posts(profile: Profile, posts: list):
@@ -77,3 +78,68 @@ def scrap_and_check_for_updates():
         compute_and_store_differences(profile, profile_data)
 
     del scraper
+
+
+# mails
+def added_post_html(profile_url: str, username: str, post_url: str, description: str, image_links: []) -> str:
+
+    images_html = ""
+    for image_link in image_links:
+        images_html += f"""\
+            <img
+                style="display:inline-block;float:left;margin-right:5px;margin-bottom:5px"
+                src="{image_link}"
+                alt="Instagram photo"
+                width="auto"
+                height="200"/>
+        """
+
+    return f"""\
+        <div id="post_0" style="color:black;width:100%;display:block;overflow:auto">
+            <p style="color:black">
+                <a style="color:gray" href="{profile_url}/">{username}</a>
+                added a new
+                <a style="color:gray" href="{post_url}">
+                post
+                </a>: {description}
+            </p>
+            <div
+                id="post_0_images
+                style="width:100%;display:block;overflow-x:auto;overflow-y:hidden;white-space:nowrap"
+            >
+                {images_html}
+            </div>
+        </div>
+    """
+
+
+@shared_task
+def send_daily_updates_email():
+    pass
+    # TODO fetch updates, build html and send email
+    posts_html = ""
+
+    html = f"""\
+        <html>
+        <head></head>
+        <body>
+            <h1 style="color:black">Good afternoon!</h1>
+            <p style="color:black">Here is you daily Instagram summary</p>
+            {posts_html}
+        </body>
+        </html>
+    """
+
+    try:
+        send_mail(
+            'InstaFeed daily update',
+            '',
+            os.environ.get("EMAIL_ACCOUNT"),
+            [],  # TODO send to
+            html_message=html,
+            fail_silently=False,
+            auth_user=os.environ.get("EMAIL_USER"),
+            auth_password=os.environ.get("EMAIL_PASS")
+        )
+    except Exception as err:
+        print(err)

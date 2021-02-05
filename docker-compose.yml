@@ -20,12 +20,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: bash -c "python manage.py makemigrations & python manage.py collectstatic --noinput & python manage.py migrate"
+    command: bash -c "python manage.py makemigrations instagramscraper && python manage.py migrate && python manage.py collectstatic --noinput"
     networks:
       - web
     depends_on:
       - web-wsgi
       - db
+      - redis
 
   web-wsgi:
     build:
@@ -34,6 +35,8 @@ services:
     command: gunicorn -b 0.0.0.0 -w 10  instafeed.wsgi:application --timeout 3000 --graceful-timeout 300
     expose:
       - 8000
+    ports:
+      - 587:587
     depends_on:
       - chrome
     volumes:

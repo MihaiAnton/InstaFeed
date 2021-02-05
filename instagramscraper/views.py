@@ -16,11 +16,7 @@ def index(request):
 
         del scraper
 
-    except Exception as err:
-        print(err)
 
-    profile = Profile(username="demo_user")
-    profile.save()
 
     response = JsonResponse(data)
     response.status_code = 200
