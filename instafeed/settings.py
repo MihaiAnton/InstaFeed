@@ -154,12 +154,12 @@ CELERY_TIMEZONE = 'Europe/London'
 CELERY_BEAT_SCHEDULE = {
     'refresh_profile_knowledge': {
         'task': 'instagramscraper.tasks.scrap_and_check_for_updates',
-        'schedule': crontab(hour=15, minute=56),
+        'schedule': 14400,
         'args': (),
     },
     'send_daily_update_mail': {
         'task': 'instagramscraper.tasks.send_daily_updates_email',
-        'schedule': crontab(hour=16, minute=24),
+        'schedule': crontab(hour=18, minute=00),
         'args': (),
     }
 }
