@@ -58,7 +58,4 @@ workflows:
   ci:
     jobs:
       - python-linting
-      - django-test:
-          requires:
-            - python-linting
       - docker-dev-build
