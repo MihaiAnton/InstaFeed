@@ -54,8 +54,23 @@ jobs:
       - run:
           command: flake8 ./ --max-line-length=120 --ignore=E402,F841,F401,E302,E305
 
+  deploy:
+    docker:
+      - image: arvindr226/alpine-ssh
+    steps:
+      - checkout
+      - run: ssh -oStrictHostKeyChecking=no -v $USER@$IP "./deploy-instafeed.sh"
+
 workflows:
   ci:
     jobs:
       - python-linting
       - docker-dev-build
+
+  cd:
+    jobs:
+      - deploy:
+          filters:
+            branches:
+              only:
+                - main
