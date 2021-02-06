@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 from pathlib import Path
 import dotenv
 import os
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,15 +28,12 @@ if os.path.isfile(dotenv_file):
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY") or "key-debug-placeholder"
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = os.environ.get("DEBUG", "TRUE") == "TRUE"
+DEBUG = False
 
-# ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [".localhost", "192.168.0.121", "127.0.0.1"]
 
-# if DEBUG:
-#     ALLOWED_HOSTS.append("*")
-DEBUG = True
-
-ALLOWED_HOSTS = ["localhost", "192.168.0.121", "127.0.0.1"]
+if DEBUG:
+    ALLOWED_HOSTS.append("*")
 
 
 # Application definition
@@ -88,20 +86,25 @@ WSGI_APPLICATION = 'instafeed.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / 'db.sqlite3',
-    # }
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'db',
-        'PORT': 5432,
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'postgres',
+            'USER': 'postgres',
+            'PASSWORD': 'postgres',
+            'HOST': 'db',
+            'PORT': 5432,
+        }
+    }
 
 
 # Password validation
@@ -151,9 +154,14 @@ CELERY_TIMEZONE = 'Europe/London'
 CELERY_BEAT_SCHEDULE = {
     'refresh_profile_knowledge': {
         'task': 'instagramscraper.tasks.scrap_and_check_for_updates',
-        'schedule': 600.0,
+        'schedule': 14400,
         'args': (),
     },
+    'send_daily_update_mail': {
+        'task': 'instagramscraper.tasks.send_daily_updates_email',
+        'schedule': crontab(hour=18, minute=00),
+        'args': (),
+    }
 }
 
 STATIC_URL = '/staticfiles/'
@@ -162,3 +170,10 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+
+
+# email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587

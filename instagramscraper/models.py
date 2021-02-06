@@ -3,7 +3,7 @@ from django.db import models
 
 # Instagram data
 class Profile(models.Model):
-    username = models.TextField(primary_key=True, max_length=256)
+    username = models.CharField(primary_key=True, max_length=64)
     accessible = models.BooleanField(default=True)
 
     def __str__(self):
@@ -28,9 +28,8 @@ class Post(models.Model):
 
 
 class Image(models.Model):
-    url = models.TextField(primary_key=True, max_length=1024)
+    url = models.TextField(primary_key=True, max_length=2048)
     post = models.ForeignKey(Post, on_delete=models.PROTECT)
-    # TODO add actual image
 
     def __str__(self):
         return f"<Image {self.url}>"
@@ -50,3 +49,5 @@ class Change(models.Model):
 
     change_type = models.CharField(max_length=64, choices=ChangeType.choices)
     post = models.ForeignKey(Post, on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now_add=True)
+    notification_sent = models.BooleanField(default=False)

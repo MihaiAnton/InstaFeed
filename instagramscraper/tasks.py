@@ -2,6 +2,8 @@ from celery import shared_task
 from .models import Profile, Post, Image, Change
 from .instagramscraper import InstagramScraper
 import os
+from django.core.mail import send_mail
+from datetime import datetime, timedelta
 
 
 def save_new_posts(profile: Profile, posts: list):
@@ -42,7 +44,7 @@ def compute_and_store_differences(profile: Profile, data: dict):
     # previous posts
     print("Previous diffs")
     previous_posts = []
-    for post in profile.post_set.all():
+    for post in profile.post_set.filter(removed=False):
         previous_posts.append(post.path)
 
     # new posts
@@ -77,3 +79,146 @@ def scrap_and_check_for_updates():
         compute_and_store_differences(profile, profile_data)
 
     del scraper
+
+
+# mails
+def added_post_html(profile_url: str, username: str, post_url: str, description: str, image_links: [],
+                    time: str) -> str:
+
+    images_html = ""
+    for image_link in image_links:
+        images_html += f"""\
+            <img
+                style="display:inline-block;float:left;margin-right:5px;margin-bottom:5px"
+                src="{image_link}"
+                alt="Instagram photo"
+                width="auto"
+                height="200"/>
+        """
+
+    return f"""\
+        <div id="post_0" style="color:black;width:100%;display:block;overflow:auto">
+            <p style="color:black">
+                {time} <a style="color:gray" href="{profile_url}/">{username}</a>
+                added a new
+                <a style="color:gray" href="{post_url}">
+                post
+                </a>: {description}
+            </p>
+            <div
+                id="post_0_images
+                style="width:100%;display:block;overflow-x:auto;overflow-y:hidden;white-space:nowrap"
+            >
+                {images_html}
+            </div>
+        </div>
+    """
+
+
+def removed_post_html(profile_url: str, username: str, post_url: str, description: str, image_links: [],
+                      time: str) -> str:
+
+    images_html = ""
+    for image_link in image_links:
+        images_html += f"""\
+            <img
+                style="display:inline-block;float:left;margin-right:5px;margin-bottom:5px"
+                src="{image_link}"
+                alt="Instagram photo"
+                width="auto"
+                height="200"/>
+        """
+
+    return f"""\
+        <div id="post_0" style="color:black;width:100%;display:block;overflow:auto">
+            <p style="color:black">
+                {time} <a style="color:gray" href="{profile_url}/">{username}</a>
+                removed a post
+                <a style="color:gray" href="{post_url}">
+                post
+                </a>: {description}
+            </p>
+            <div
+                id="post_0_images
+                style="width:100%;display:block;overflow-x:auto;overflow-y:hidden;white-space:nowrap"
+            >
+                {images_html}
+            </div>
+        </div>
+    """
+
+
+def format_time(time: datetime):
+    return "" + str(time.hour) + ":" + str(time.minute)
+
+
+@shared_task
+def send_daily_updates_email():
+    time_limit = datetime.now() - timedelta(days=1)
+    changes = Change.objects\
+        .exclude(notification_sent=True)\
+        .filter(created_at__gte=time_limit)\
+        .order_by('created_at')
+
+    posts_html = ""
+    BASE_URL = 'https://www.instagram.com/'
+    new_updates = False
+
+    for change in changes:
+        new_updates = True
+        change.notification_sent = True
+        change.save(update_fields=["notification_sent"])
+
+        post = change.post
+        profile = post.profile
+        username = profile.username
+        profile_url = BASE_URL + username
+        post_url = BASE_URL + post.path
+        description = post.description
+        image_links = [image.url for image in post.image_set.all()]
+        print(change.created_at)
+        time = format_time(change.created_at)
+        if change.change_type == Change.ChangeType.POST_ADDED:
+            posts_html += added_post_html(profile_url, username, post_url, description,
+                                          image_links, time)
+
+        elif change.change_type == Change.ChangeType.POST_REMOVED:
+            posts_html += removed_post_html(profile_url, username, post_url, description,
+                                            image_links, time)
+
+    if new_updates:
+        html = f"""\
+            <html>
+            <head></head>
+            <body>
+                <h1 style="color:black">Good afternoon!</h1>
+                <p style="color:black">Here is you daily Instagram summary 🚀</p>
+                {posts_html}
+            </body>
+            </html>
+        """
+    else:
+        html = f"""\
+            <html>
+            <head></head>
+            <body>
+                <h1 style="color:black">Good afternoon!</h1>
+                <p style="color:black">Nothing interesting happened on Instagram today 😕</p>
+                {posts_html}
+            </body>
+            </html>
+        """
+
+    try:
+        send_mail(
+            'InstaFeed daily update 📱',
+            '',
+            os.environ.get("EMAIL_ACCOUNT"),
+            [],  # add your email address here
+            html_message=html,
+            fail_silently=False,
+            auth_user=os.environ.get("EMAIL_USER"),
+            auth_password=os.environ.get("EMAIL_PASS")
+        )
+    except Exception as err:
+        print(err)
