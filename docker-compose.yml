@@ -13,14 +13,14 @@ services:
     networks:
       - web
     depends_on:
-      - migrations
       - chrome
+      - migrations
 
   migrations: # for migrations purposes after the server is up
     build:
       context: .
       dockerfile: Dockerfile
-    command: bash -c "python manage.py makemigrations instagramscraper && python manage.py migrate && python manage.py collectstatic --noinput"
+    command: bash -c "python manage.py makemigrations instagramscraper && python manage.py migrate"
     networks:
       - web
     depends_on:
@@ -33,10 +33,9 @@ services:
       context: .
       dockerfile: Dockerfile
     command: gunicorn -b 0.0.0.0 -w 10  instafeed.wsgi:application --timeout 3000 --graceful-timeout 300
-    expose:
-      - 8000
     ports:
       - 587:587
+      - 8004:8000
     depends_on:
       - chrome
     volumes:
@@ -69,22 +68,8 @@ services:
     expose:
       - 6379
 
-  # selenium-hub:
-  #   image: selenium/hub:4.0.0-beta-1-prerelease-20210201
-  #   container_name: selenium-hub
-  #   ports:
-  #     - "4442:4442"
-  #     - "4443:4443"
-  #     - "4444:4444"
-
   chrome:
     image: selenium/standalone-chrome:88.0-chromedriver-88.0
-    # depends_on:
-    #   - selenium-hub
-    # environment:
-    #   - SE_EVENT_BUS_HOST=selenium-hub
-    #   - SE_EVENT_BUS_PUBLISH_PORT=4442
-    #   - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
     privileged: true
     shm_size: 2g
     networks:

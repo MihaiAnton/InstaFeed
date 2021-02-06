@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 from pathlib import Path
 import dotenv
 import os
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +28,7 @@ if os.path.isfile(dotenv_file):
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY") or "key-debug-placeholder"
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", "TRUE") == "TRUE"
+DEBUG = False
 
 ALLOWED_HOSTS = [".localhost", "192.168.0.121", "127.0.0.1"]
 
@@ -153,9 +154,14 @@ CELERY_TIMEZONE = 'Europe/London'
 CELERY_BEAT_SCHEDULE = {
     'refresh_profile_knowledge': {
         'task': 'instagramscraper.tasks.scrap_and_check_for_updates',
-        'schedule': 600.0,
+        'schedule': crontab(hour=15, minute=56),
         'args': (),
     },
+    'send_daily_update_mail': {
+        'task': 'instagramscraper.tasks.send_daily_updates_email',
+        'schedule': crontab(hour=16, minute=24),
+        'args': (),
+    }
 }
 
 STATIC_URL = '/staticfiles/'
