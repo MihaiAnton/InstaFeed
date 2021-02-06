@@ -9,6 +9,7 @@ db.sqlite3
 # vs code
 .vscode/*
 vscode
+.env
 
 # Python cache
 __pycache__/

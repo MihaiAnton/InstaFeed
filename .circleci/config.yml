@@ -12,6 +12,7 @@ jobs:
           command: |
             python3 -m venv venv
             . venv/bin/activate
+            pip install selenium
             pip install -r requirements.txt
       - save_cache:
           key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
@@ -33,15 +34,15 @@ jobs:
       - run:
           name: Building dev container
           command: |
-            docker-compose -f docker-compose.dev.yml build
+            docker-compose -f docker-compose.yml build
       - run:
           name: Running dev image
           command: |
-            docker-compose -f docker-compose.dev.yml up -d
+            docker-compose -f docker-compose.yml up -d
       - run:
           name: Stopping dev image
           command: |
-            docker-compose -f docker-compose.dev.yml down
+            docker-compose -f docker-compose.yml down
 
   python-linting:
     docker:
@@ -60,3 +61,4 @@ workflows:
       - django-test:
           requires:
             - python-linting
+      - docker-dev-build
