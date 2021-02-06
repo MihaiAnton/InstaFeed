@@ -25,8 +25,7 @@ RUN wget -O /tmp/chromedriver.zip http://chromedriver.storage.googleapis.com/`cu
 RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
 
 # set display port to avoid crash
-ENV DISPLAY=:99
+ENV DISPLAY=:99s
 
-RUN pip install whitenoise psycopg2
 
 COPY . /code/
