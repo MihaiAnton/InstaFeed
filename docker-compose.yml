@@ -35,6 +35,8 @@ services:
     command: gunicorn -b 0.0.0.0 -w 10  instafeed.wsgi:application --timeout 3000 --graceful-timeout 300
     depends_on:
       - chrome
+    expose:
+      - 8000
     volumes:
       - .:/code
     networks:
