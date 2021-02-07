@@ -21,7 +21,6 @@ importlib-metadata==3.4.0
 kombu==5.0.2
 mccabe==0.6.1
 prompt-toolkit==3.0.14
-psycopg2==2.8.6
 pycodestyle==2.6.0
 pyflakes==2.2.0
 python-dotenv==0.15.0

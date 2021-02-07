@@ -27,5 +27,6 @@ RUN apt-get -y update
 # set display port to avoid crash
 # ENV DISPLAY=:99s
 
+RUN pip install psycopg2
 
 COPY . /code/
