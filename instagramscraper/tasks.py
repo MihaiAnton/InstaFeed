@@ -44,20 +44,20 @@ def compute_and_store_differences(profile: Profile, data: dict):
         data {dict} -- [new scraped data]
     """
     # previous posts
-    print("Previous diffs")
+    # print("Previous diffs")
     previous_posts = []
     for post in profile.post_set.filter(removed=False):
         previous_posts.append(post.path)
 
     # new posts
-    print("New posts")
+    # print("New posts")
     new_posts = []
     for post in data["posts"]:
         if post["path"] not in previous_posts:
             new_posts.append(post)
 
     # removed posts
-    print("Removed posts")
+    # print("Removed posts")
     actual_posts = [post["path"] for post in data["posts"]]
     removed_posts = []
     for post_path in previous_posts:
@@ -76,7 +76,7 @@ def scrap_and_check_for_updates():
                                os.environ.get("INSTAGRAM_PASSWORD"))
 
     for profile in Profile.objects.all():
-        print(f"Scraping profile:{profile.username}")
+        # print(f"Scraping profile:{profile.username}")
         profile_data = scraper.scrape_profile(profile.username)
         compute_and_store_differences(profile, profile_data)
 
@@ -86,7 +86,7 @@ def scrap_and_check_for_updates():
 # mails
 @shared_task
 def added_post_html(profile_url: str, username: str, post_url: str, description: str, image_links: [],
-                    time: str) -> str:
+                    _time: str) -> str:
 
     images_html = ""
     for image_link in image_links:
@@ -102,7 +102,7 @@ def added_post_html(profile_url: str, username: str, post_url: str, description:
     return f"""\
         <div id="post_0" style="color:black;width:100%;display:block;overflow:auto">
             <p style="color:black">
-                {time} <a style="color:gray" href="{profile_url}/">{username}</a>
+                {_time} <a style="color:gray" href="{profile_url}/">{username}</a>
                 added a new
                 <a style="color:gray" href="{post_url}">
                 post
@@ -120,7 +120,7 @@ def added_post_html(profile_url: str, username: str, post_url: str, description:
 
 @shared_task
 def removed_post_html(profile_url: str, username: str, post_url: str, description: str, image_links: [],
-                      time: str) -> str:
+                      _time: str) -> str:
 
     images_html = ""
     for image_link in image_links:
@@ -136,7 +136,7 @@ def removed_post_html(profile_url: str, username: str, post_url: str, descriptio
     return f"""\
         <div id="post_0" style="color:black;width:100%;display:block;overflow:auto">
             <p style="color:black">
-                {time} <a style="color:gray" href="{profile_url}/">{username}</a>
+                {_time} <a style="color:gray" href="{profile_url}/">{username}</a>
                 removed a post
                 <a style="color:gray" href="{post_url}">
                 post
@@ -153,7 +153,7 @@ def removed_post_html(profile_url: str, username: str, post_url: str, descriptio
 
 
 @shared_task
-def format_time(time: datetime):
+def format_time(_time: datetime):
     return "" + str(time.hour) + ":" + str(time.minute)
 
 
@@ -181,7 +181,7 @@ def send_daily_updates_email():
         post_url = BASE_URL + post.path
         description = post.description
         image_links = [image.url for image in post.image_set.all()]
-        print(change.created_at)
+        # print(change.created_at)
         created_at = format_time(change.created_at)
         if change.change_type == Change.ChangeType.POST_ADDED:
             posts_html += added_post_html(profile_url, username, post_url, description,
