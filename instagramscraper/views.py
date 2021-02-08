@@ -25,6 +25,7 @@ def index(request):
 
 
 def mail(request):
+    print("Mailing")
     send_daily_updates_email.delay()
     print(os.environ.get("EMAIL_USER"))
 

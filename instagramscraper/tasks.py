@@ -1,9 +1,11 @@
+from __future__ import absolute_import, unicode_literals
 from celery import shared_task
 from .models import Profile, Post, Image, Change
 from .instagramscraper import InstagramScraper
 import os
 from django.core.mail import send_mail
 from datetime import datetime, timedelta
+import time
 
 
 def save_new_posts(profile: Profile, posts: list):
@@ -82,6 +84,7 @@ def scrap_and_check_for_updates():
 
 
 # mails
+@shared_task
 def added_post_html(profile_url: str, username: str, post_url: str, description: str, image_links: [],
                     time: str) -> str:
 
@@ -115,6 +118,7 @@ def added_post_html(profile_url: str, username: str, post_url: str, description:
     """
 
 
+@shared_task
 def removed_post_html(profile_url: str, username: str, post_url: str, description: str, image_links: [],
                       time: str) -> str:
 
@@ -148,6 +152,7 @@ def removed_post_html(profile_url: str, username: str, post_url: str, descriptio
     """
 
 
+@shared_task
 def format_time(time: datetime):
     return "" + str(time.hour) + ":" + str(time.minute)
 
@@ -177,14 +182,14 @@ def send_daily_updates_email():
         description = post.description
         image_links = [image.url for image in post.image_set.all()]
         print(change.created_at)
-        time = format_time(change.created_at)
+        created_at = format_time(change.created_at)
         if change.change_type == Change.ChangeType.POST_ADDED:
             posts_html += added_post_html(profile_url, username, post_url, description,
-                                          image_links, time)
+                                          image_links, created_at)
 
         elif change.change_type == Change.ChangeType.POST_REMOVED:
             posts_html += removed_post_html(profile_url, username, post_url, description,
-                                            image_links, time)
+                                            image_links, created_at)
 
     if new_updates:
         html = f"""\
