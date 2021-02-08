@@ -4,16 +4,16 @@ networks:
   web:
 
 services:
-  # celery: #for starting celery
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   command: bash -c "celery -A instafeed worker -B -S django -l info"
-  #   networks:
-  #     - web
-  #   depends_on:
-  #     - chrome
-  #     - migrations
+  celery: #for starting celery
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: bash -c "celery -A instafeed worker -B -S django -l info"
+    networks:
+      - web
+    depends_on:
+      - chrome
+      - migrations
 
   migrations: # for migrations purposes after the server is up
     build:
