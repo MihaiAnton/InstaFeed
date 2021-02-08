@@ -25,7 +25,7 @@ def index(request):
 
 
 def mail(request):
-    send_daily_updates_email()
+    send_daily_updates_email.delay()
     print(os.environ.get("EMAIL_USER"))
 
     response = JsonResponse({"email": os.environ.get("EMAIL_USER")})

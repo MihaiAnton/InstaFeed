@@ -6,10 +6,8 @@ networks:
 
 services:
   celery: #for starting celery
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: bash -c "celery -A instafeed worker -B -l info"
+    build: .
+    command: bash -c "celery -A instafeed worker"
     networks:
       - celery-net
     depends_on:
