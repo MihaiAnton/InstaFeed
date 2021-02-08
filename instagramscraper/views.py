@@ -10,23 +10,22 @@ from .tasks import scrap_and_check_for_updates, send_daily_updates_email
 
 
 def index(request):
-    try:
-        scraper = InstagramScraper(os.environ.get("INSTAGRAM_USERNAME"),
-                                   os.environ.get("INSTAGRAM_PASSWORD"))
-        data = scraper.scrape_post("/p/CBYzTySjak1/")
+    # try:
+    #     scraper = InstagramScraper(os.environ.get("INSTAGRAM_USERNAME"),
+    #                                os.environ.get("INSTAGRAM_PASSWORD"))
+    #     data = scraper.scrape_post("/p/CBYzTySjak1/")
 
-        del scraper
-    except Exception as err:
-        print(err)
+    #     del scraper
+    # except Exception as err:
+    #     print(err)
 
-    response = JsonResponse(data)
+    response = JsonResponse({})
     response.status_code = 200
     return response
 
 
 def mail(request):
     send_daily_updates_email.delay()
-    print(os.environ.get("EMAIL_USER"))
 
     response = JsonResponse({"email": os.environ.get("EMAIL_USER")})
     response.status_code = 200

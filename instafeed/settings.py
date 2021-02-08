@@ -30,7 +30,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY") or "key-debug-placeholder"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = [".localhost", "192.168.0.121", "127.0.0.1"]
+ALLOWED_HOSTS = ["*"]
 
 if DEBUG:
     ALLOWED_HOSTS.append("*")
@@ -138,6 +138,16 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+CHANNEL_LAYERS = {
+    "default": {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],
+        },
+        # "ROUTING": "analytics.routing.websocket_urlpatterns",
+    },
+}
 
 
 # Static files (CSS, JavaScript, Images)
