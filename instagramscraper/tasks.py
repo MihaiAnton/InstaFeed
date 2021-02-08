@@ -19,7 +19,6 @@ def save_new_posts(profile: Profile, posts: list):
         for photo_url in post_data["data"]["photo_urls"]:
             image = Image(url=photo_url, post=post)
             image.save()
-            # TODO add image
 
         change = Change(change_type=Change.ChangeType.POST_ADDED, post=post)
         change.save()
@@ -154,7 +153,7 @@ def removed_post_html(profile_url: str, username: str, post_url: str, descriptio
 
 @shared_task
 def format_time(_time: datetime):
-    return "" + str(time.hour) + ":" + str(time.minute)
+    return "" + str(_time.hour) + ":" + str(_time.minute)
 
 
 @shared_task
