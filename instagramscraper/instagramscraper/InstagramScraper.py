@@ -91,7 +91,7 @@ class InstagramScraper(IInstagramScraper):
         posts = []
 
         for post_path in post_paths:
-            # print(f"Getting {post_path}")
+            print(f"Getting {post_path}")
             try:
                 post_data = self.scrape_post(post_path)
                 posts.append({"path": post_path, "data": post_data})

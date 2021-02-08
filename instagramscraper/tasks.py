@@ -75,9 +75,12 @@ def scrap_and_check_for_updates():
                                os.environ.get("INSTAGRAM_PASSWORD"))
 
     for profile in Profile.objects.all():
-        # print(f"Scraping profile:{profile.username}")
-        profile_data = scraper.scrape_profile(profile.username)
-        compute_and_store_differences(profile, profile_data)
+        print(f"Checking profile:{profile.username}")
+        try:
+            profile_data = scraper.scrape_profile(profile.username)
+            compute_and_store_differences(profile, profile_data)
+        except Exception as err:
+            pass
 
     del scraper
 
