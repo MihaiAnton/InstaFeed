@@ -157,11 +157,11 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 14400,
         'args': (),
     },
-    'send_daily_update_mail': {
-        'task': 'instagramscraper.tasks.send_daily_updates_email',
-        'schedule': crontab(hour=18, minute=00),
-        'args': (),
-    }
+    # 'send_daily_update_mail': {
+    #     'task': 'instagramscraper.tasks.send_daily_updates_email',
+    #     'schedule': crontab(hour=18, minute=00),
+    #     'args': (),
+    # }
 }
 
 STATIC_URL = '/staticfiles/'
