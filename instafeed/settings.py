@@ -30,7 +30,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY") or "key-debug-placeholder"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = [".localhost", "192.168.0.121", "127.0.0.1"]
+ALLOWED_HOSTS = ["*"]
 
 if DEBUG:
     ALLOWED_HOSTS.append("*")
