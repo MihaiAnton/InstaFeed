@@ -7,12 +7,13 @@ networks:
 services:
   celery: #for starting celery
     build: .
-    command: bash -c "celery -A instafeed worker"
-    networks:
-      - celery-net
+    command: bash -c "celery -A instafeed worker -B -l info"
     depends_on:
       - chrome
       - migrations
+    networks:
+      - web
+      - celery-net
 
   migrations: # for migrations purposes after the server is up
     build:
@@ -30,7 +31,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: gunicorn -b 0.0.0.0 -w 10  instafeed.wsgi:application --timeout 3000 --graceful-timeout 300
+    command: gunicorn -b 0.0.0.0 -w 10 -p 8000 instafeed.wsgi:application --timeout 3000 --graceful-timeout 300
     depends_on:
       - chrome
     expose:
@@ -49,6 +50,7 @@ services:
       - 8000:80
       - 443:80
       - 80:80
+      - 8080:80
     depends_on:
       - web-wsgi
       - redis
@@ -61,6 +63,7 @@ services:
   redis:
     image: redis:latest
     networks:
+      - web
       - celery-net
     command: redis-server
     expose:
