@@ -7,7 +7,7 @@ networks:
 services:
   celery: #for starting celery
     build: .
-    command: bash -c "celery -A instafeed worker -B -l info"
+    command: bash -c "celery -A instafeed worker -B -l info --concurrency=10"
     depends_on:
       - chrome
       - migrations

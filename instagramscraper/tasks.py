@@ -214,6 +214,7 @@ def send_daily_updates_email():
         """
 
     try:
+        print("Sending mail")
         send_mail(
             'InstaFeed daily update 📱',
             '',
