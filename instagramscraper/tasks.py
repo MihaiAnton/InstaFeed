@@ -219,7 +219,7 @@ def send_daily_updates_email():
             'InstaFeed daily update 📱',
             '',
             os.environ.get("EMAIL_ACCOUNT"),
-            ["antonmihai58@gmail.com"],  # add your email address here
+            ["mihai_anton98@yahoo.com"],  # add your email address here
             html_message=html,
             fail_silently=False,
             auth_user=os.environ.get("EMAIL_USER"),
