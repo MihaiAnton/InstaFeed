@@ -2,15 +2,16 @@ version: "3"
 
 networks:
   web:
+  celery-net:
 
 services:
   celery: #for starting celery
     build:
       context: .
       dockerfile: Dockerfile
-    command: bash -c "celery -A instafeed worker -B -S django -l info"
+    command: bash -c "celery -A instafeed worker -B -l info"
     networks:
-      - web
+      - celery-net
     depends_on:
       - chrome
       - migrations
@@ -40,6 +41,7 @@ services:
       - .:/code
     networks:
       - web
+      - celery-net
     environment:
       - DEBUG=FALSE
 
@@ -61,7 +63,7 @@ services:
   redis:
     image: redis:latest
     networks:
-      - web
+      - celery-net
     command: redis-server
     expose:
       - 6379
@@ -88,6 +90,7 @@ services:
       - 5432
     networks:
       - web
+      - celery-net
 
 volumes:
   media:
