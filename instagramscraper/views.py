@@ -26,7 +26,7 @@ def index(request):
 
 def mail(request):
     print("Mailing")
-    send_daily_updates_email()
+    send_daily_updates_email.delay()
     print(os.environ.get("EMAIL_USER"))
 
     response = JsonResponse({"email": os.environ.get("EMAIL_USER")})
@@ -35,7 +35,7 @@ def mail(request):
 
 
 def scrape_once(request):
-    scrap_and_check_for_updates()
+    scrap_and_check_for_updates.delay()
 
     response = JsonResponse({})
     response.status_code = 200
