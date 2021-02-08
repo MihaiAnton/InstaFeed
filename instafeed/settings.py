@@ -162,16 +162,16 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Europe/London'
 CELERY_BEAT_SCHEDULE = {
-    # 'refresh_profile_knowledge': {
-    #     'task': 'instagramscraper.tasks.scrap_and_check_for_updates',
-    #     'schedule': 14400,
-    #     'args': (),
-    # },
-    # 'send_daily_update_mail': {
-    #     'task': 'instagramscraper.tasks.send_daily_updates_email',
-    #     'schedule': crontab(hour=18, minute=00),
-    #     'args': (),
-    # }
+    'refresh_profile_knowledge': {
+        'task': 'instagramscraper.tasks.scrap_and_check_for_updates',
+        'schedule': 14400,
+        'args': (),
+    },
+    'send_daily_update_mail': {
+        'task': 'instagramscraper.tasks.send_daily_updates_email',
+        'schedule': crontab(hour=18, minute=00),
+        'args': (),
+    }
 }
 
 STATIC_URL = '/staticfiles/'
