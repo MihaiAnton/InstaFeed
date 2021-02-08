@@ -11,9 +11,9 @@ services:
     depends_on:
       - chrome
       - migrations
-  networks:
-    - web
-    - celery-net
+    networks:
+      - web
+      - celery-net
 
   migrations: # for migrations purposes after the server is up
     build:
