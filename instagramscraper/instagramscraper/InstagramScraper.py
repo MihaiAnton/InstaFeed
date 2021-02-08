@@ -73,6 +73,7 @@ class InstagramScraper(IInstagramScraper):
             except Exception as err:
                 pass
 
+            print("Logged in")
             return True
         except Exception as err:
             # TODO log

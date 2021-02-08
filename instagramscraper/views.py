@@ -35,7 +35,7 @@ def mail(request):
 
 
 def scrape_once(request):
-    scrap_and_check_for_updates.delay()
+    scrap_and_check_for_updates()
 
     response = JsonResponse({})
     response.status_code = 200

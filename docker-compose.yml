@@ -5,15 +5,15 @@ networks:
   celery-net:
 
 services:
-  celery: #for starting celery
-    build: .
-    command: bash -c "celery -A instafeed worker -B -l info"
-    depends_on:
-      - chrome
-      - migrations
-    networks:
-      - web
-      - celery-net
+  # celery: #for starting celery
+  #   build: .
+  #   command: bash -c "celery -A instafeed worker -B -l info"
+  #   depends_on:
+  #     - chrome
+  #     - migrations
+  # networks:
+  #   - web
+  #   - celery-net
 
   migrations: # for migrations purposes after the server is up
     build:
@@ -31,7 +31,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: gunicorn -b 0.0.0.0 -w 10 -p 8000 instafeed.wsgi:application --timeout 3000 --graceful-timeout 300
+    command: gunicorn -b 0.0.0.0 -w 10  instafeed.wsgi:application --timeout 3000 --graceful-timeout 300
     depends_on:
       - chrome
     expose:
