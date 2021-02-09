@@ -48,9 +48,6 @@ services:
     build: ./nginx
     ports:
       - 8004:80
-      - 443:80
-      - 80:80
-      - 8080:80
     depends_on:
       - web-wsgi
       - redis
